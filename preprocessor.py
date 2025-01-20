@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 import pandas as pd
 
 def preprocess(data):
@@ -9,7 +10,22 @@ def preprocess(data):
 
     df = pd.DataFrame({'user_message': messages, 'message_date': dates})
     # convert message_date type
-    df['message_date'] = pd.to_datetime(df['message_date'], format='%d/%m/%Y, %H:%M - ')
+    
+    # Define a function to parse dates with fallback
+    def parse_date(date_str):
+        try:
+            # Try parsing with the four-digit year format
+            return datetime.strptime(date_str.strip(" - "), "%d/%m/%Y, %H:%M")
+        except ValueError:
+            try:
+                # Fallback to two-digit year format
+                 datetime.strptime(date_str.strip(" - "), "%d/%m/%y, %H:%M")
+            except ValueError:
+                # Return NaT for invalid formats
+                return pd.NaT
+
+    # Apply the date parsing function
+    df['message_date'] = df['message_date'].apply(parse_date)
 
     df.rename(columns={'message_date': 'date'}, inplace=True)
 
