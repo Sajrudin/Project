@@ -30,7 +30,7 @@ def fetch_stats(user_name, df):
         words.extend(message.split())
 
     # Fetching total number of media files
-    no_of_media_messages = df[df['message'] == '<Media omitted>\n'].shape[0]
+    no_of_media_messages = df[df['message'] == '<Media omitted>'].shape[0]
 
     # Fetching number of links shared
     links = []

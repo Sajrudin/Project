@@ -3,43 +3,48 @@ from datetime import datetime
 import pandas as pd
 
 def preprocess(data):
-    pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s-\s'
+    pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s?\d{1,2}:\d{2}(?:\s?[APap][Mm])?\s?-\s?'
 
     messages = re.split(pattern, data)[1:]
     dates = re.findall(pattern, data)
+
+    #Cleaning extra spaces and new line character
+    dates  = [date.replace('\u202f', ' ') for date in dates]
+    messages = [message.strip() for message in messages]
 
     df = pd.DataFrame({'user_message': messages, 'message_date': dates})
     # convert message_date type
     
     # Define a function to parse dates with fallback
     def parse_date(date_str):
-        try:
-            # Try parsing with the four-digit year format
-            return datetime.strptime(date_str.strip(" - "), "%d/%m/%Y, %H:%M")
-        except ValueError:
+        date_str = date_str.strip(" - ")
+        for fmt in ("%d/%m/%Y, %H:%M", "%d/%m/%Y, %I:%M %p", "%d/%m/%y, %H:%M", "%d/%m/%y, %I:%M %p"):
             try:
-                # Fallback to two-digit year format
-                 datetime.strptime(date_str.strip(" - "), "%d/%m/%y, %H:%M")
+                return datetime.strptime(date_str, fmt)
             except ValueError:
-                # Return NaT for invalid formats
-                return pd.NaT
+                continue
+        return pd.NaT  # Return NaT if no format matches
 
     # Apply the date parsing function
     df['message_date'] = df['message_date'].apply(parse_date)
 
+    # Rename column
     df.rename(columns={'message_date': 'date'}, inplace=True)
 
+    # Split the user-message data into separate user and message columns
     users = []
     messages = []
-    for message in df['user_message']:
-        entry = re.split('([\w\W]+?):\s', message)
-        if entry[1:]:  # user name
-            users.append(entry[1])
-            messages.append(" ".join(entry[2:]))
-        else:
-            users.append('group_notification')
-            messages.append(entry[0])
 
+    for message in df['user_message']:
+        if ": " in message:
+            user, actual_message = message.split(": ", 1)  # Split into two parts
+            users.append(user)
+            messages.append(actual_message)
+        else:
+            users.append("Group Notification")
+            messages.append(message)
+
+    # Add the user and message columns to the dataframe
     df['user'] = users
     df['message'] = messages
     df.drop(columns=['user_message'], inplace=True)
