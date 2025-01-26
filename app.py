@@ -196,10 +196,10 @@ if uploaded_file is not None:
             active_month = helper.month_activity(selected_user, df)
             fig = px.bar(
                 active_month,
-                x='Month-Year', y='No. of Messages',
+                x='Month', y='No. of Messages',
                 orientation="v",
                 title="Most Active Months",
-                labels={0: "Month-Year", 1: "No. of Messages"},
+                labels={0: "Month", 1: "No. of Messages"},
                 template="plotly_white"
             )
 

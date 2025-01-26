@@ -145,5 +145,5 @@ def month_activity(username, df):
     if username != 'Overall':
         df = df[df['user'] == username]
 
-    return df['month_year'].value_counts().reset_index().rename(columns = {'month_year':'Month-Year','count':'No. of Messages'})
+    return df['month'].value_counts().reset_index().rename(columns = {'month':'Month','count':'No. of Messages'})
     

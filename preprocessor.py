@@ -53,7 +53,7 @@ def preprocess(data):
     df['day_name'] = df['date'].dt.day_name()
     df['hour'] = df['date'].dt.hour
     df['minute'] = df['date'].dt.minute
-    df['month_year'] = df['month'] + '-' + df['year'].astype(str) 
+    
 
     period = []
     for hour in df[['day_name', 'hour']]['hour']:
