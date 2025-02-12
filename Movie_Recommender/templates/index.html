@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .movies {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .movie {
+            width: 30%;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        .movie img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .movie h3 {
+            margin: 0;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .movie {
+                width: 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Recommendation System</h1>
+        <div class="form-group">
+            <label for="movie">Choose a movie:</label>
+            <select id="movie">
+                <option value="" disabled selected>Select a movie</option>
+                {% for movie in movies %}
+                <option value="{{ movie }}">{{ movie }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button onclick="getRecommendations()">Get Recommendations</button>
+        <div class="movies" id="recommendations"></div>
+    </div>
+
+    <script>
+        function getRecommendations() {
+            const movie = document.getElementById('movie').value;
+            if (movie) {
+                fetch(`/recommendations?movie=${encodeURIComponent(movie)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const recommendationsDiv = document.getElementById('recommendations');
+                        recommendationsDiv.innerHTML = '';
+                        data.forEach(movie => {
+                            const movieDiv = document.createElement('div');
+                            movieDiv.className = 'movie';
+                            movieDiv.innerHTML = `
+                                <img src="${movie.poster}" alt="${movie.title}">
+                                <h3>${movie.title}</h3>
+                            `;
+                            recommendationsDiv.appendChild(movieDiv);
+                        });
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
